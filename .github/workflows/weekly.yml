@@ -1,0 +1,31 @@
+name: weekly-edition
+
+on:
+  schedule:
+    - cron: "0 13 * * 2"   # every Tuesday 13:00 UTC (after Monday night finalizes)
+  workflow_dispatch: {}     # lets you run it on demand from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Write this week's edition
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LEAGUE_ID: ${{ secrets.LEAGUE_ID }}
+        run: python beat_reporter.py
+      - name: Publish to the blog
+        run: |
+          git config user.name "daydream-dispatch-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs
+          git commit -m "New edition" || echo "nothing new"
+          git push
