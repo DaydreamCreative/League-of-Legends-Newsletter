@@ -14,6 +14,7 @@ on:
           - weekly
           - preseason
           - schedule
+          - draft
 
 permissions:
   contents: write
